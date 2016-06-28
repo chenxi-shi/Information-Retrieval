@@ -299,7 +299,7 @@ def cal_proxim(_res_path, _q_id, _query):
 				_doc.append(_detail[_t]['tp'])
 		if len(_doc) > 1:
 			_rangeOfW = min_span(_doc)
-			_numOfC_T = len(_doc)
+			_numOfC_T = len(_query)  # problem here, len(_query) or len(_doc)
 			_lengthOfD = _detail['doc_len']
 			_proxim_docs[_d] = (1500 - _rangeOfW) * _numOfC_T / (_lengthOfD + _v)
 
