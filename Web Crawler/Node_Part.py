@@ -254,7 +254,6 @@ class Node:  # deep first strategy
 		#print(_parsed_url)
 		if _url_netloc:
 			if not Node._netloc_pattern.search(_url_netloc):
-				print(_parsed_url)
 				print('netloc is not right, change to path')
 				_url_path = _parsed_url.netloc + _parsed_url.path
 				_url_path = Node._dupl_slash_dot_pattern.sub('/', _url_path)  # remove duplicate slash and dot
@@ -268,6 +267,7 @@ class Node:  # deep first strategy
 
 				_url = urljoin(_src_url, _url_path)  # join netloc with parent url
 				_parsed_url = urlparse(_url)
+				print(_url)
 		else:
 			_url = urljoin(_src_url, _parsed_url.path)  # join netloc with parent url
 			_parsed_url = urlparse(_url)
