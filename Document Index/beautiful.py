@@ -4,7 +4,6 @@ from os.path import dirname, abspath
 
 import time
 from stemming.porter2 import stem
-from nltk.stem.porter import *
 
 
 def token_text(text):
@@ -144,7 +143,6 @@ class parse_docs(object):
 	parse_file(pause_num=1000)
 	index_tokens(docno, text)
 	'''
-	st = PorterStemmer()
 	term_map = {}
 	tokens = {}
 	finished = False
