@@ -2,7 +2,7 @@ import os
 from functools import partial
 from urllib.parse import urlunparse, urlparse
 import time
-from Node_Part import Node
+from Node_Part import Node, okapi_tf
 from elasticseach_func import *
 import hashlib
 # import lxml
@@ -16,10 +16,12 @@ class bfs_Wave:
 	recording deep info into Node.graph
 	'''
 	page_total = 0
-	file_num = 1
+	# file_num = 1
 	page_count = 0
-	page_size = 1000
+	# page_size = 1000
+	tt_doc_len = 0
 	_child_deep = 1
+	avg_doc_len = 500
 	def __init__(self, _wave, _deep):
 		self.wave = _wave  # wave is sorted list of _next_wave_domain
 		self.next_wave = set()
@@ -59,59 +61,71 @@ class bfs_Wave:
 	'''
 
 	@staticmethod
-	def one_node_work(node_instance, filename, _deep):
-		_page_info = Node.download_html(node_instance.normed_url)
+	def one_node_work(node_instance, _deep, _terms_list):
+		_html_info = Node.download_html(node_instance.normed_url)
 
-		if _page_info:
+		if _html_info:
 			bfs_Wave.page_total += 1
-			_medium_res = Node.parse_page(_page_info['content'])  # parse the page
+			# return {'title': t, 'href': h, 'text': c}
+			_medium_res = Node.parse_page(_html_info['content'])  # parse the page
+
+			# strategy: delete page with _okapi_score <= 1/3  <-- ttf <=1
+			_okapi_score, _doc_len = okapi_tf(_terms_list, bfs_Wave.avg_doc_len, _medium_res['text'])
+			if _okapi_score <= 0.33:
+				print("GIVEUP {}, low score: {}".format(node_instance.normed_url, _okapi_score))
+				return
+			bfs_Wave.tt_doc_len += _doc_len
+			bfs_Wave.page_count += 1
+			bfs_Wave.avg_doc_len = bfs_Wave.tt_doc_len / bfs_Wave.page_count
 			node_instance.add_all_child(_deep, _medium_res)
+			# This part can create _docno like deep-domain-pathhash
+			'''
 			_parsed_url = urlparse(node_instance.normed_url)
 			_url_netloc = _parsed_url.netloc
 			_url_path = _parsed_url.path
 			m = hashlib.md5()
 			m.update(_url_path.encode(encoding='utf-8', errors='replace'))
-			_docno = '-'.join(map(str, [_deep,
-			                            Node.domain_urls[_url_netloc]['domain_no'],
-			                            m.hexdigest()]))
-			_source = {'docno': _docno,                         # a int
-			           'HTTPheader': _page_info['HTTPheader'],  # a string
+			_docno = '-'.join(map(str, [_deep, Node.domain_urls[_url_netloc]['domain_no'], m.hexdigest()]))
+			'''
+
+			_source = {'docno': node_instance.normed_url,       # a string
+			           'HTTPheader': _html_info['HTTPheader'],  # a string
 			           'title': _medium_res['title'],           # a string
-			           'text': ''.join(_medium_res['content']), # a string
-			           'html_Source': 'N/A',                    # a string
+			           'text': ''.join(_medium_res['text']), # a string
+			           'html_Source': _html_info['content'],    # a string
 			           'in_links': '\n'.join(Node.graph[node_instance.normed_url]['in_links']),     # a string
 			           'out_links': '\n'.join(Node.graph[node_instance.normed_url]['out_links']),   # a string
 			           'author': 'Chenxi',                      # a string
 			           'depth': _deep,                          # a int
 			           'url': node_instance.normed_url          # a string
 			           }
-			pprint.pprint(_source)
-			load_files(es, my_index, my_type, _source, _docno)
+			# pprint.pprint(_source)
+			load_files(es, my_index, my_type, _source, node_instance.normed_url)
+			'''
 			filename.write('url: {}\n'.format(node_instance.normed_url))
 			filename.write('num of href: {}\n'.format(len(_medium_res['href'])))
 			filename.write('href: {}\n\n'.format(_medium_res['href']))
 			filename.write('title: {}\n\n'.format(_medium_res['title']))
-			filename.write('content: {}\n\n\n'.format(''.join(_medium_res['content'])))
-			bfs_Wave.page_count += 1
-			print('\n', '-' * 20, 'FINISHED {}'.format(node_instance.normed_url))
-			print('-' * 20, 'num of href: {}'.format(len(_medium_res['href'])))
-			print('-' * 20, 'URL FINISHED: {}\n'.format(bfs_Wave.page_total))
+			filename.write('content: {}\n\n\n'.format(''.join(_medium_res['text'])))
+			'''
+
+			print('\nFINISHED {}'.format(node_instance.normed_url))
+			print('# of HREF: {}'.format(len(_medium_res['href'])))
+			print('URL FINISHED: {}\n'.format(bfs_Wave.page_total))
 
 
 		# TODO pop up page after accessed
 		# TODO: clear RAM after 1000 page
 
 	@staticmethod
-	def thread_handler(_url, _filepath, _deep):
+	def thread_handler(_url, _deep, _terms_list):
 		# download page of one node
-		if bfs_Wave.page_count > 1000:
-			bfs_Wave.file_num += 1
-			bfs_Wave.page_count = 0
 
-		with open('{}{}'.format(_filepath, bfs_Wave.file_num * bfs_Wave.page_size), 'a+', errors='ignore') as test:
-			bfs_Wave.one_node_work(node_instance=Node(_url),
-			                    filename=test,
-			                    _deep=_deep)
+		#with open('{}{}'.format(_filepath, bfs_Wave.file_num * bfs_Wave.page_size), 'a+', errors='ignore') as test:
+		bfs_Wave.one_node_work(node_instance=Node(_url),
+		                       #filename=test,
+		                       _deep=_deep,
+		                       _terms_list=_terms_list)
 		return _url
 
 	def __iter__(self):
@@ -137,40 +151,43 @@ class bfs_Wave:
 				continue
 
 # TODO: use yield for instance
-def whole_work(maxurl, poolsize, _start_links, filepath):
+def whole_work(maxurl, poolsize, _start_links, _terms_list):
 	# remove the previous results
+	'''
 	for _ in os.listdir(filepath):
 		print('remove {}'.format(_))
 		os.remove('{}/{}'.format('results/', _))
+	'''
 	# at time 0
 	#TODO put domain into next_wave_domain
 	next_wave = bfs_Wave.from_start_links(_start_links)
 	while bfs_Wave.page_total < maxurl:
 		current_wave = next_wave  # instance of bfs_Wave
-		print('-'*40, 'WAVE STARTING', '---->URL #: {}'.format(bfs_Wave.page_total), '-'*40)
+		print('-'*30, 'WAVE STARTING', '---->URL #: {}'.format(bfs_Wave.page_total), '-'*40)
 
 		rr_iterator = bfs_Wave.rr_select(current_wave.wave)
 
 		from multiprocessing.dummy import Pool as ThreadPool
 		with ThreadPool(poolsize) as pool:
-			for _n in pool.imap_unordered(partial(bfs_Wave.thread_handler, _filepath=filepath, _deep=current_wave.deep),
+			for _n in pool.imap_unordered(partial(bfs_Wave.thread_handler,
+			                                      #_filepath=filepath,
+			                                      _deep=current_wave.deep,
+			                                      _terms_list=_terms_list),
 			                              rr_iterator,
 			                              chunksize=poolsize):
-				print('FINISHED SOURCE: {}'.format(_n))
-
+				pass
 		next_wave = bfs_Wave(bfs_Wave.get_next_wave(), current_wave.deep+1)
 
 		print('--------------------->URL #: {}'.format(bfs_Wave.page_total))
-		print('-' * 40, 'WAVE FINISHED', '-' * 40, '\n\n')
+		print('-' * 30, 'WAVE FINISHED', '-' * 40, '\n\n')
 		# TODO: delete this line after debug
-		input('Press <ENTER> to go on')
+		#input('Press <ENTER> to go on\n>>>')
 
 if __name__ == '__main__':
 	start_time = time.time()
-	meri_query = 'WATER SEA OCEAN MARITIME OFFSHORE HYDRODYNAMIC SHOAL WATERWAY WATERLINE'
-	acc_query = 'ACCIDENTS FIRE IGNITE COLLISION COLLIDE INJURED DAMAGE SAFE POLLUTION STRUCK ALLISION RUPTUR BREACH FLOOD'
-	ship_query = 'SHIP BOAT TOWBOAT VESSEL AFT BARGE TANKER JETTY HULL ABOARD ' \
-	             'PILOT OPERATOR VISIBILITY CAPTAIN CREW STEER'
+	terms_list = {'meri_terms': 'WATER SEA OCEAN MARITIME OFFSHORE HYDRODYNAMIC SHOAL WATERWAY WATERLINE',
+	              'acc_terms': 'ACCIDENTS FIRE IGNITE COLLISION COLLIDE INJURED DAMAGE SAFE POLLUTION STRUCK ALLISION RUPTUR BREACH FLOOD',
+	              'ship_terms': 'SHIP BOAT TOWBOAT VESSEL AFT BARGE TANKER JETTY HULL ABOARD PILOT OPERATOR VISIBILITY CAPTAIN CREW STEER ANCHOR'}
 
 	start_links = ['http://www.marineinsight.com/marine-safety/12-types-of-maritime-accidents/',
 	               'http://www.shipwrecklog.com/',
@@ -186,10 +203,10 @@ if __name__ == '__main__':
 
 # 'http://csb.stanford.edu/class/public/pages/sykes_webdesign/'
 	es = Elasticsearch()
-	my_index = 'hw3_dataset'
+	my_index = 'maritimeaccidents'
 	my_type = 'document'
 	create_dataset(es, my_index)
 
-	whole_work(2000, 8, test_links, 'results/')
+	whole_work(2000, 8, start_links, terms_list)
 
 	print("--- {0} seconds ---".format(time.time() - start_time))

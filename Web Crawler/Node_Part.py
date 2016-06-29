@@ -11,7 +11,7 @@ from stemming.porter2 import stem
 import time
 import requests
 from reppy.cache import RobotsCache
-# import lxml
+import lxml
 
 '''
 graph = {'A': {'out_links':set(['B', 'C']), 'deep':x, 'in_links': set()},
@@ -52,7 +52,7 @@ class Node:  # deep first strategy
 
 	def __init__(self, normed_url):  # 'http://www.google.com' for starting links
 		self.normed_url = normed_url
-		print('SOURCE: {}'.format(self.normed_url))
+		#print('SOURCE: {}'.format(self.normed_url))
 
 	@staticmethod
 	def robot_rules(_url_scheme, _url_netloc):  # return a robot rules objects
@@ -77,7 +77,7 @@ class Node:  # deep first strategy
 			_session = requests.Session()
 			print('URL: {}'.format(_url))
 			print('SOURCE: {}'.format(_src_url))
-			_url_scheme, _url_netloc, _url_path = Node.conon_url(_url, _src_url)
+			_url_scheme, _url_netloc, _url_path = Node.canon_url(_url, _src_url)
 			_url = urlunparse((_url_scheme, _url_netloc, _url_path, '', '', ''))
 			if _url not in Node.graph:
 				Node.graph[_url] = {'out_links': set(), 'deep': 0, 'in_links': set()}
@@ -97,7 +97,7 @@ class Node:  # deep first strategy
 
 	@staticmethod
 	def parse_page(_html):  # extract all right href, not next wave href
-		_soup = BeautifulSoup(_html, "html.parser")
+		_soup = BeautifulSoup(_html, "lxml")
 		# for remove BMP、JPG、JPEG、PNG、GIF, PDF, CSS, JS,TIFF
 		_link_ext_pattern = re.compile(
 			r'\.(([jJ][pP][eE]?[gG])|([pP]([nN][gG]|[dD][fF]))|([bB][mM][pP])|(([gG]|[tT])[iI][fF]{1,2})|(([cC]|[jJ])[sS]{1,2}))\Z')
@@ -130,7 +130,8 @@ class Node:  # deep first strategy
 			return text
 
 		_href = [_['href'] for _ in _soup.find_all(has_href)]
-		return {'title': _soup.title.get_text(), 'href': _href, 'content': html2text(_soup)}
+		_title = _soup.title.get_text() if _soup.title else 'N/A'
+		return {'title': _title, 'href': _href, 'text': html2text(_soup)}
 
 	def __repr__(self):
 		return 'Node({!r})'.format(self.normed_url)
@@ -141,7 +142,7 @@ class Node:  # deep first strategy
 		for _child_url in _medium_res['href']:
 			# start doing norm url
 			_session = requests.Session()
-			_url_scheme, _url_netloc, _url_path = Node.conon_url(_child_url, self.normed_url)
+			_url_scheme, _url_netloc, _url_path = Node.canon_url(_child_url, self.normed_url)
 			_child_url = urlunparse((_url_scheme, _url_netloc, _url_path, '', '', ''))
 
 			# if old domain
@@ -151,10 +152,10 @@ class Node:  # deep first strategy
 					try:
 						_disallowed = Node.domain_urls[_url_netloc]['robot_rules'].disallowed(_child_url, '*')
 					except:
-						print('GIVEUP! robot.txt block {}'.format(_child_url))
+						# print('GIVEUP! robot.txt block {}'.format(_child_url))
 						continue
 					if _disallowed:
-						print('GIVEUP! robot.txt block {}'.format(_child_url))
+						# print('GIVEUP! robot.txt block {}'.format(_child_url))
 						continue
 				# if allowed or no rule & not old path
 				if _url_path not in Node.domain_urls[_url_netloc]['accessed']:
@@ -166,13 +167,13 @@ class Node:  # deep first strategy
 					try:
 						_disallowed = _rules.disallowed(_child_url, '*')
 					except:
-						print('GIVEUP! robot.txt block {}'.format(_child_url))
-						#print(_url)
-						#print(_url_scheme, _url_netloc, _url_path)
-						#print(self.normed_url, '\n')
+						# print('GIVEUP! robot.txt block {}'.format(_child_url))
+						# print(_url)
+						# print(_url_scheme, _url_netloc, _url_path)
+						# print(self.normed_url, '\n')
 						continue
 					if _disallowed:
-						print('GIVEUP! robot.txt block {}'.format(_child_url))
+						# print('GIVEUP! robot.txt block {}'.format(_child_url))
 						continue
 				# if allowed or no rules
 				Node.domain_urls[_url_netloc] = {'accessed': {},
@@ -229,9 +230,11 @@ class Node:  # deep first strategy
 			elif hasattr(e, 'code'):
 				print('The server couldn\'t fulfill the request.')
 				print('Error code: ', e.code)
+			return
 		except requests.RequestException as e:
 			print('Status_code Error! ')
 			print(e)
+			return
 		else:
 			Node.domain_urls[_domain]['last_time'] = _last_time
 			#Node.domain_urls[_domain]['last_time'] = time.perf_counter()
@@ -241,7 +244,7 @@ class Node:  # deep first strategy
 
 
 	@staticmethod
-	def conon_url(_url, _src_url):  # _src_netloc must inludes scheme and netloc
+	def canon_url(_url, _src_url):  # _src_netloc must inludes scheme and netloc
 		if not isinstance(_url, str):
 			print('URL should be string, now it is {}'.format(type(_url)))
 			return
@@ -289,10 +292,9 @@ class Node:  # deep first strategy
 
 		return _url_scheme, _url_netloc, _url_path  # remove fragment
 
-
 '''
 @staticmethod
-	def conon_url_with_head(_url, _src_url, _session):  # _src_netloc must inludes scheme and netloc
+	def canon_url_with_head(_url, _src_url, _session):  # _src_netloc must inludes scheme and netloc
 		if not isinstance(_url, str):
 			print('URL should be string, now it is {}'.format(type(_url)))
 			return
@@ -350,8 +352,6 @@ class Node:  # deep first strategy
 		return _url_scheme, _url_netloc, _url_path  # remove fragment
 '''
 
-
-
 # for test
 def one_node_work(node_instance, filename, _deep):
 	try:
@@ -366,7 +366,7 @@ def one_node_work(node_instance, filename, _deep):
 		filename.write('num of href: {}\n'.format(len(_medium_res['href'])))
 		filename.write('title: {}\n\n'.format(_medium_res['title']))
 		filename.write('href: {}\n\n'.format(_medium_res['href']))
-		filename.write('content: {}\n\n\n'.format(''.join(_medium_res['content'])))
+		filename.write('content: {}\n\n\n'.format(''.join(_medium_res['text'])))
 
 	for k, v in Node.domain_urls.items():
 		print('domain: {}'.format(k))
@@ -374,18 +374,31 @@ def one_node_work(node_instance, filename, _deep):
 		print('accessed: \n{}'.format(v['accessed']))
 		print('next_wave: \n{}'.format(v['next_wave']))
 
-def conon_query(_q):
-	_q = _q.lower()
-	_q = _q.split()
+def canon_query(_q):
+	_q = _q.lower().split()
 	_q = [stem(_) for _ in _q]
 	return _q
 
+def token_text(text, one_kind_terms):
+	# match token format (remove tokens not alpha and number
+	regex = re.compile(r"(([-_a-z0-9]+\.)*[-_a-z0-9]+)")
+	_d = regex.findall(text.lower())
+	_tk_text = [stem(_t[0]) for _t in _d if _t[0]]
+	_tt_qterm = sum(_tk_text.count(_t) for _t in canon_query(one_kind_terms))
+	return _tt_qterm, len(_tk_text)
+
+def okapi_tf(_term_list, avg_d_l, _doc):  # assume avg_d_l = 500
+	_okapiTF_score = 0
+	for k, v in _term_list.items():
+		_tf, _doc_len = token_text(_doc, v)
+		_okapiTF_score += _tf / (_tf + 0.5 + 1.5 * _doc_len / avg_d_l)
+	return _okapiTF_score, _doc_len
+
 if __name__ == '__main__':
 	start_time = time.time()
-	meri_query = 'WATER SEA OCEAN MARITIME OFFSHORE HYDRODYNAMIC SHOAL WATERWAY WATERLINE'
-	acc_query = 'ACCIDENTS FIRE IGNITE COLLISION COLLIDE INJURED DAMAGE SAFE POLLUTION STRUCK ALLISION RUPTUR BREACH FLOOD'
-	ship_query = 'SHIP BOAT TOWBOAT VESSEL AFT BARGE TANKER JETTY HULL ABOARD ' \
-	             'PILOT OPERATOR VISIBILITY CAPTAIN CREW STEER'
+	terms_list = {'meri_terms': 'WATER SEA OCEAN MARITIME OFFSHORE HYDRODYNAMIC SHOAL WATERWAY WATERLINE',
+	              'acc_terms': 'ACCIDENTS FIRE IGNITE COLLISION COLLIDE INJURED DAMAGE SAFE POLLUTION STRUCK ALLISION RUPTUR BREACH FLOOD',
+	              'ship_terms': 'SHIP BOAT TOWBOAT VESSEL AFT BARGE TANKER JETTY HULL ABOARD PILOT OPERATOR VISIBILITY CAPTAIN CREW STEER ANCHOR'}
 
 	start_links = ['http://www.marineinsight.com/marine-safety/12-types-of-maritime-accidents/',
 	               'http://www.shipwrecklog.com/',

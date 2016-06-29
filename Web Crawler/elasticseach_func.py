@@ -187,7 +187,7 @@ def load_files(_es_instance, _my_index, _my_type, _source, _docno):
 
 if __name__ == '__main__':
 	es = Elasticsearch()
-	my_index = 'hw3_dataset'
+	my_index = 'maritimeaccidents'
 	my_type = 'document'
 
 	_source = {'docno': 1,
