@@ -72,7 +72,7 @@ class bfs_Wave:
 			# strategy: delete page with _okapi_score <= 1/3  <-- ttf <=1
 			_okapi_score, _doc_len = okapi_tf(_terms_list, bfs_Wave.avg_doc_len, _medium_res['text'])
 			if _okapi_score <= 0.33:
-				print("GIVEUP {}, low score: {}".format(node_instance.normed_url, _okapi_score))
+				print("Low score: {}, GIVEUP {}".format(_okapi_score, node_instance.normed_url))
 				return
 			bfs_Wave.tt_doc_len += _doc_len
 			bfs_Wave.page_count += 1
@@ -156,6 +156,7 @@ def whole_work(maxurl, poolsize, _start_links, _terms_list):
 	'''
 	for _ in os.listdir(filepath):
 		print('remove {}'.format(_))
+
 		os.remove('{}/{}'.format('results/', _))
 	'''
 	# at time 0
