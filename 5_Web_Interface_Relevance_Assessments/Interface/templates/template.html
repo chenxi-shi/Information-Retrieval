@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>July | Search UI for Elasticsearch</title>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/reset.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/calaca.css') }}">
+</head>
+<body>
+    {% block header %}
+        <!-- Title and search box -->
+        <header class="jumbotron">
+            <form action="/logout" method="post">
+                <input class="logout_pager" type="submit" value="Logout">
+            </form>
+            <h1 class="title">{{ title }}</h1>
+            <div class="search-box-container">
+                <form action="/" method="post">
+                    <input type="text" class="search-box" placeholder="{{ escape(search) }}" name="query" id="query">
+                    <input type="submit" value="Submit" class="submit_pager">
+                </form>
+            </div>
+        </header>
+    {% end %}
+
+    <div>
+        {% block body %}
+        {% end %}
+    </div>
+</body>
+</html>

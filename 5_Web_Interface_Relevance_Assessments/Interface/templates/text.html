@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0" />
+
+    <title>Page Text</title>
+    <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
+    <link href="{{ static_url('css/module-comment.css') }}" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+    <div class=container>
+        <div class=header>
+            <span><a href="http://www.ccs.neu.edu/home/vip/teach/IRcourse/html/index.html"
+                     target="_blank">Information Retrieval</a></span>
+            <p>Our Team: Ran Qiao, Yu Wen, Chenxi Shi</p>
+        </div>
+        <div class=navigation>
+            <ul>
+                <li><a href="/">Back to Search</a></li>
+            </ul>
+        </div>
+        <div class=body>
+            <div class="blog-post">
+                <div class="post-title">
+                    <h2 class="title">
+                        <br/><a href='{{ url }}' target="_blank">
+                            {{ title }}
+                        </a>
+                    </h2>
+                    <p class=date>{{ datetime.date.today() }} Topic: {{ squeeze(query) }}</p>
+                    <div>
+                        {% if his_relev != 'Nothing' %}
+                            <h3>{{ current_user }}, you chose {{ his_relev }}.</h3>
+                        {% end %}
+                        <section class="pagination-controls">
+                            <form action="/text?url={{ url }}&query={{ squeeze(query) }}" method="post">
+                                <br/><label for="relevant">Relevant</label>
+                                <select name="relevant" id="relevant" class="relevant-box">
+                                    <option value="empty"></option>
+                                    <option value="0">Irrelevant</option>
+                                    <option value="1">Relevant</option>
+                                    <option value="2">Relevant++</option>
+                                </select>
+                                <input type="submit" value="Submit" class="pager">
+                            </form>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-body" contenteditable="true">
+        {% try %}
+        <iframe src='{{ url }}' frameborder="0" width=80% height="800" scrolling="auto"></iframe>
+        {% except %}
+        <p>Failed to load iFrame, please manually go to the url</p>
+        {% end %}
+        {% autoescape None %}
+        <p style="border: 2px solid powderblue; margin: 6% 10%;"><b>Highlight Text:</b><br><br>{{ text }}</p>
+    </div>
+
+</body>
+</html>

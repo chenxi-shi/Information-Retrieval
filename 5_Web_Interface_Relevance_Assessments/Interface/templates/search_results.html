@@ -1,0 +1,35 @@
+{% extends "template.html" %}
+
+{% block body %}
+    <main class="results-container">
+        <section class="results-info">
+            <p id="response-details" class="ng-binding">
+                {{ len(hits) }} results ({{ took_time }}ms)
+            </p>
+            <p id="pagination-details" class="ng-binding">
+                Showing All
+            </p>
+        </section>
+        <section class="results">
+            {% for hit in hits %}
+            <form method="get">
+                <article class="result ng-scope" style>
+                    <a href='text?url={{ escape(hit[0]) }}&query={{ squeeze(query) }}' class="ng-binding" target="_blank">
+                        {{ hit[1] }}
+                    </a>
+                    <p>{{ hit[2][:150] }}</p>
+                    <!--<button type="button" class="btn btn-primary">Primary <span class="badge">7</span></button>-->
+                    {% if hit[3] != 'NOTHING' %}
+                        <p class="badge_his">
+                           {{ current_user }}, you chose {{ hit[3] }}.
+                        </p>
+                    {% end %}
+                </article>
+            </form>
+            {% end %}
+
+        </section>
+    <p class="congratulations">Congratulations! Finaly, you've scored them all...</p>
+    </main>
+
+{% end %}
