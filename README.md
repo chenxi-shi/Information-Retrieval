@@ -18,6 +18,7 @@ Homework of my course "Information Retrieval", by Python 3.
  - topic: maritime accident
  - Breadth-first search to iterate all pages in early waves. 
  - topic module application for accurately checking the relevance of pages
+ - in total 36000 pages, more than 50% is relevant to topic "maritime accident"
  - distinguish wanted pages by header content type before downloading it.
  - applied network session to restore cookies for fast and low-duty re-access.
  - sort domains according to last accessing time, so that multi threads can access different domains to speed up crawling
