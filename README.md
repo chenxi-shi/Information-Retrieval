@@ -1,5 +1,5 @@
 # Information-Retrieval
-Homework of my course "Information Retrieval", by Python 3.4.
+Homeworks of my course "Information Retrieval", by Python 3.4.
 
  - Instructor: Virgil Pavlu
  - University: Northeastern University
@@ -7,6 +7,7 @@ Homework of my course "Information Retrieval", by Python 3.4.
 
 1. Elasticsearch Index
  - index more than 80000 documents into elasticsearch
+ - optimized index speed to around 15min
 
 2. Documents Index
  - making my own "elasticsearch"
@@ -25,6 +26,15 @@ Homework of my course "Information Retrieval", by Python 3.4.
 4. Web Graph Computation
  - applied pagerank and HITS to evaluate the page in whole page set
  - regard in & out links of pages as directed network graph
- - web graph computation is a kind of admitting of idea “Cream rises to the top”: good page can be referenced more and more. 
+ - web graph computation is a kind of admitting of idea “Cream rises to the top”: 
+good authority page can be referenced more and more, 
+good hub page digs more and more good authority pages.
 
 5. Web Interface Relevance Assessments
+ - applied Tornado Server as a web server.
+ - web server can be accessed remotely
+ - server communicates with elasticsearch database for searching and extracting data
+ - MongoDB is applied to restore page info
+ - made python based html template to create search result page automatically and flexibility.
+ - set log in permit to filter user
+ -
