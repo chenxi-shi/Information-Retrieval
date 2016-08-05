@@ -17,14 +17,14 @@ Homework of my course "Information Retrieval", by Python 3.4.
  - topic: maritime accident
  - applied Breadth-first search to iterate all pages in early wave. 
  - applied topic module to accurately check the relevance of pages.
-- distinguish page by header content type before downloading it.
+ - distinguish page by header content type before downloading it.
  - applied network session to restore cookies for fast re-access.
  - sort domains with according to last accessing time, so that I can use multi thread access different domains
  - normalize href links in good method, to reduce page drop rate 
 
 4. Web Graph Computation
  - applied pagerank and HITS to evaluate the page in whole page set
-- regard in & out links of pages as directed network graph
+ - regard in & out links of pages as directed network graph
  - web graph computation is a kind of admitting of idea “Cream rises to the top”: good page can be referenced more and more. 
 
 5. Web Interface Relevance Assessments
