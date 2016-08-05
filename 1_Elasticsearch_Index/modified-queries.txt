@@ -1,25 +1,25 @@
-85.   corrupt public officials
-59.   weather fatality.
-56.   prime lending rate move.
-71.   incursions land, air, water border area country guerrilla group
-64.   hostage.
-62.   military coup attempted.
-93.   supporters National Rifle Association (NRA)
-99.   Development Iran Contra Affair.
-58.   rail strike.
-77.   poaching method wildlife.
-54.   contract or preliminary agreement reservation, to launch a commercial satellite.
-87.   current criminal actions officers financial institution.
-94.   crime perpetrated with the aid of a computer.
-100.  non-communist, industrialized states regulate transfer goods high-tech "dual-use" technologies nations.
-89.   investment OPEC member state "downstream" operation.
-61.   role Israel Iran Contra Affair.
-95.   crime solving.
-68.   manufacturing employe workers safety fiber
-57.   MCI.
-97.   fiber optics technology use.
-98.   produce fiber optics equipment.
-60.   standards of performance to determine salary levels and incentive pay seniority longevity job.
-80.   1988 presidential.
-63.   translation.
-91.   army weapons systems.
+54.   contract agreement reservation launch commercial satellite.
+56.   prediction prime lending rate actual move.
+57.   MCI Bell System breakup
+58.   predict anticipate rail strike ongoing
+59.   weather fatality
+60.   controversy performance determine salary levels incentive contrasted pay solely basis seniority longevity
+61.   Israel Iran Contra Affair
+62.   military coup d'etat.
+63.   machine translation system
+64.   politically motivated hostage.
+68.   safety manufacturing employees installation workers fine diameter fibers insulation
+71.   incursions border military forces guerrilla
+77.   poaching method certain type of wildlife.
+80.   platform 1988 presidential candidate
+85.   allegations corrupt public officials governmental jurisdiction
+87.   criminal actions officers failed U.S. financial
+89.   investment OPEC member state downstream operation
+91.   acquisition U.S. Army weapons systems
+93.   supporters National Rifle Association NRA
+94.   crime perpetrated aid computer
+95.   computer application crime solving
+97.   instances fiber optics technology
+98.   produce fiber optics equipment
+99.   development Iran Contra Affair
+100.   efforts non communist industrialized states regulate transfer tech goods technologies undesirable nations
