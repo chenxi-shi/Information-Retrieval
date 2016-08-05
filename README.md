@@ -27,8 +27,8 @@ Homeworks of my course "Information Retrieval", by Python 3.4.
  - applied pagerank and HITS to evaluate the page in whole page set
  - regard in & out links of pages as directed network graph
  - web graph computation is a kind of admitting of idea “Cream rises to the top”: 
-good authority page can be referenced more and more, 
-good hub page digs more and more good authority pages.
+ * good authority page can be referenced more and more, 
+ * good hub page digs more and more good authority pages.
 
 5. Web Interface Relevance Assessments
  - applied Tornado Server as a web server.
@@ -37,4 +37,6 @@ good hub page digs more and more good authority pages.
  - MongoDB is applied to restore page info
  - made python based html template to create search result page automatically and flexibility.
  - set log in permit to filter user
- -
+ - applied application layer info to transfer parameter between pages. 
+ - after getting manual evaluation, apply query compute R-precision, Average Precision, nDCG, precision and recall and F1 to evaluate search result coming from page set.
+ - drew precision & recall graphics for the visualized cooperation between search results distribution and page relevant true values.
