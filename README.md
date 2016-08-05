@@ -27,8 +27,8 @@ Homeworks of my course "Information Retrieval", by Python 3.4.
  - applied pagerank and HITS to evaluate the page in whole page set
  - regard in & out links of pages as directed network graph
  - web graph computation is a kind of admitting of idea “Cream rises to the top”: 
- * good authority page can be referenced more and more, 
- * good hub page digs more and more good authority pages.
+  * good authority page can be referenced more and more, 
+  * good hub page digs more and more good authority pages.
 
 5. Web Interface Relevance Assessments
  - applied Tornado Server as a web server.
