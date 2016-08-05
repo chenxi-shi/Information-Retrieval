@@ -21,6 +21,7 @@ from es_methods import insert_doc
 import settings
 
 
+
 def create_setting(es_instance, _target_index,
                    stplst_path="stoplist.txt"):  # stoplist.txt has to be put in es config folder
 	index_settings = {
