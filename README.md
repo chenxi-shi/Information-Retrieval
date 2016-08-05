@@ -50,4 +50,7 @@ Homework of my course "Information Retrieval", by Python 3.
 
 
 Some of the print screen of home work
-[search_result.png](/3_Web_Crawler/search_result.png "Optional Title")
+ - [search_result.png](/3_Web_Crawler/search_result.png "Optional Title")
+ - [page_showing.png](/5_Web_Interface_Relevance_Assessments/page_showing.png "Optional Title")
+ - [search_interface.png](/5_Web_Interface_Relevance_Assessments/search_interface.png "Optional Title")
+ - [search_results.png](/5_Web_Interface_Relevance_Assessments/search_results.png "Optional Title")
