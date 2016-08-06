@@ -118,7 +118,7 @@ def doc_freq_AND_term_freq_without_english_stemmer(_es_instance, _my_index, _my_
 	                          body=body)
 	# pprint.pprint(res)
 	# print(len(res["hits"]["hits"]))
-	if res["hists"]["hits"]:
+	if res["hits"]["hits"]:
 		if not _doc_freq:  # using len(res["hits"]["hits"]) also a good idea
 			_doc_freq = res["hits"]["hits"][0]["fields"]["df"][0]
 		for _doc in res["hits"]["hits"]:
