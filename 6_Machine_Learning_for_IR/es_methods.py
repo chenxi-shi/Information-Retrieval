@@ -1,6 +1,5 @@
 import pprint
 from re import compile
-from collections import defaultdict
 
 from elasticsearch import Elasticsearch, TransportError
 from elasticsearch.helpers import bulk, scan
@@ -118,7 +117,7 @@ def doc_freq_AND_term_freq_without_english_stemmer(_es_instance, _my_index, _my_
 	                          body=body)
 	# pprint.pprint(res)
 	# print(len(res["hits"]["hits"]))
-	if res["hits"]["hits"]:
+	if res["hists"]["hits"]:
 		if not _doc_freq:  # using len(res["hits"]["hits"]) also a good idea
 			_doc_freq = res["hits"]["hits"][0]["fields"]["df"][0]
 		for _doc in res["hits"]["hits"]:
@@ -189,10 +188,11 @@ def doc_length(es_instance, _source_index, _my_type, _doc_id):
 	                              positions=False,
 	                              payloads=False,
 	                              offsets=False)
-
-	# pprint.pprint(res)
-	_doc_length = sum(_term_detail["term_freq"] for _term_detail in res["term_vectors"]["text"]["terms"].values())
-	return _doc_length
+	if res["found"]:
+		_doc_length = sum(_term_detail["term_freq"] for _term_detail in res["term_vectors"]["text"]["terms"].values())
+		return _doc_length
+	else:
+		return 0
 
 
 def doc_length2(_doc_list, es_instance, _source_index, _my_type):
@@ -259,7 +259,7 @@ def search_doc(_es_instance, _my_index, _my_type, _match_dict, _fields_list=Fals
 		return _res["hits"]["hits"][0]
 	else:
 		print("{} does not exit".format(_match_dict))
-		exit(-1)
+		pass
 
 def insert_doc(_es_instance, _target_index, _my_type, _doc_detail, _docno):
 	action = {
@@ -319,72 +319,12 @@ def generate_all_doc(_es_instance, _my_index, _my_type="_all"):
 		for _doc in scan(_es_instance, index=_my_index, doc_type=_my_type,
 		               query={"query": {"match_all": {}}}):
 			yield _doc
-	# for x in generate_all_doc(es, "hw6_ap_dataset", "56_doc"):
-	# 	print(x)
 
-# change_script = "if( ctx._source.features.containsKey(\"okapi_tf\") ) {{" \
-#                 "ctx._source.features.okapi_tf += {0};" \
-#                 "}} else {{" \
-#                 "	ctx._source.features.okapi_tf = {0};" \
-#                 "}};" \
-#                 "if( ctx._source.features.containsKey(\"tf_idf\") ) {{" \
-#                 "ctx._source.features.tf_idf += {1};" \
-#                 "}} else {{" \
-#                 "	ctx._source.features.tf_idf = {1};" \
-#                 "}};" \
-#                 "if( ctx._source.features.containsKey(\"bm25\") ) {{" \
-#                 "ctx._source.features.bm25 += {2};" \
-#                 "}} else {{" \
-#                 "	ctx._source.features.bm25 = {2};" \
-#                 "}}".format(111, 222, 333)
-# change_script = "if( ctx._source.features.containsKey(\"okapi_tf\") ){ ctx._source.features.okapi_tf += 123; } else { ctx._source.features.okapi_tf = 123; };if( ctx._source.features.containsKey(\"tf_idf\") ){ ctx._source.features.tf_idf += 123; } else { ctx._source.features.tf_idf = 123; };if( ctx._source.features.containsKey(\"bm25\") ){ ctx._source.features.bm25 += 123; } else { ctx._source.features.bm25 = 123; }"
-# update_doc(es, target_index, "64_doc", "AP890711-0075", _change_script=change_script)
 
 if __name__ == "__main__":
 	es = Elasticsearch()
 	source_index = "maritimeaccidents"
 	my_type = "document"
-
-
-	# url_id = 'http://en.wikipedia.org/wiki/Strand_jack'
-	# url_id2 = 'http://en.wikipedia.org/wiki/Belfast_Lough'
-	#
-	# url_id3 = 'hhh'
-	# url_id4 = 'hhh2'
-	# url_id5 = 'hhh3'
-	#
-	# source3 = {"docno": url_id3,
-	#            "HTTPheader": "HTTPheader",
-	#            "title": "title",
-	#            "text": "algorithm, Strand jack - algorithms, chenxi Wikipedia, the free encyclopedia Strand jack From Wikipedia chenxi",
-	#            "html_Source": "html_Source",
-	#            "in_links": ["123"],
-	#            "out_links": ["456"],
-	#            "author": "Chenxi",
-	#            "depth": 0,
-	#            "url": url_id3}
-	#
-	# source4 = {"docno": url_id4,
-	#            "HTTPheader": "HTTPheader",
-	#            "title": "title",
-	#            "text": "algorithms, Strand jack - chenxi Wikipedia, the free Strand jack From Wikipedia chenxi",
-	#            "html_Source": "html_Source",
-	#            "in_links": ["123"],
-	#            "out_links": ["456"],
-	#            "author": "Chenxi",
-	#            "depth": 0,
-	#            "url": url_id4}
-	#
-	# source5 = {"docno": url_id5,
-	#            "HTTPheader": "HTTPheader",
-	#            "title": "title",
-	#            "text": "Strand jack - chenxi Wikipedia, the free Strand jack From Wikipedia chenxi",
-	#            "html_Source": "html_Source",
-	#            "in_links": ["123"],
-	#            "out_links": ["456"],
-	#            "author": "Chenxi",
-	#            "depth": 0,
-	#            "url": url_id5}
 
 
 	def load_to_elasticsearch(_es_instance, _my_index, _my_type, _source, _docno):
@@ -395,27 +335,6 @@ if __name__ == "__main__":
 			'_id': _docno
 		}
 		bulk(_es_instance, [action])
-
-
-	#
-	# load_to_elasticsearch(es, 'test', my_type, source3, url_id3)
-	# load_to_elasticsearch(es, 'test', my_type, source4, url_id4)
-	# load_to_elasticsearch(es, 'test', my_type, source5, url_id5)
-
-	# def update_doc(_es_instance, _my_index, _my_type, _docno, change_dict):
-	# 	action = {
-	# 		'_op_type': 'update',
-	# 		'_index': _my_index,
-	# 		'_type': _my_type,
-	# 		'_id': _docno,
-	# 		'doc': change_dict
-	# 	}
-	# 	try:
-	# 		bulk(_es_instance, [action])
-	# 	except TransportError as e:
-	# 		print(e)
-	# 	except:
-	# 		pass
 
 
 	# update_doc(es, my_index, my_type, url_id3, source)

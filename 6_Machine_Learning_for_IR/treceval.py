@@ -331,8 +331,8 @@ if __name__ == '__main__':
     # evaluate(qrel_dict, ranked_list, true_rel_count)
 
     #qrel_file = 'crawled_qrel.txt'
-    qrel_file = 'train_true_values.txt'
-    ranked_list_file = 'lin_train_predict.txt'
+    qrel_file = 'test_true_values.txt'
+    ranked_list_file = 'lin_test_predict.txt'
     #ranked_list_file = 'search_results.txt'
     qrel_dict, true_rel_count = read_qrel(qrel_file)
     ranked_list = read_ranked_list(ranked_list_file)

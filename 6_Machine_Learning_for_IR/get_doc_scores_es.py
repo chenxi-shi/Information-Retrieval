@@ -15,14 +15,13 @@ class restore_scores():
 	query_dict = get_query_dict()
 	results_dict = load_qrels(query_dict)
 
-	def __init__(self, _es_instance, _source_index,
-	             _index_es_flag=False, _clear_features_flag=False, _restore_doc_len_flag=False,
+	def __init__(self, _es_instance, _source_index, _source_type, _target_index,
+	             _index_es_flag=False, _restore_doc_len_flag=False,
 	             _okapi_idf_bm25=False, _laplace=False, _jm=False,
 	             _all_5_score=False, _update_doc_len=False,
 	             _text_term_appeared=False, _title_term_appeared=False,
 	             _text_unique_term_update=False, _title_unique_term_update=False):
 		self._write_es_flag = _index_es_flag
-		self._clear_features_flag = _clear_features_flag
 		self._restore_doc_len_flag = _restore_doc_len_flag
 
 		self._okapi_idf_bm25 = _okapi_idf_bm25
@@ -42,6 +41,8 @@ class restore_scores():
 
 		self._es_instance = _es_instance
 		self._source_index = _source_index
+		self._target_index = _target_index
+		self._source_type = _source_type
 		self._doc_count = 0
 
 	def restore_text_title_lable(self):
@@ -54,22 +55,7 @@ class restore_scores():
 		'''
 		# parse and write doc text, title, and label into es
 		if self._write_es_flag:
-			whole_prep_dataset(self._es_instance, self._source_index, restore_scores.results_dict)
-
-	def clear_features(self):
-		if self._clear_features_flag:
-			print("Starting clearing features...")
-			_script = "ctx._source.features = new_features"
-			_params = {"new_features": dict.fromkeys(
-				["doc_len", "okapi_tf", "tf_idf", "bm25", "laplace", "jm",
-				 "text_term_appeared_in_query_len", "title_term_appeared_in_query_len",
-				 "text_unique_term", "title_unique_term"],
-				0)}
-			for _doc in generate_all_doc(self._es_instance, self._source_index, _my_type="_all"):
-				# print(_doc)
-				update_doc(self._es_instance, self._source_index, _doc['_type'], _doc['_id'],
-				           _change_script=_script, _change_params=_params)
-				print("Clear {}".format(_doc['_id']))
+			whole_prep_dataset(self._es_instance, self._source_index, self._source_type, self._target_index, restore_scores.results_dict)
 
 	def restore_doc_len(self):
 		if self._restore_doc_len_flag:
@@ -78,7 +64,7 @@ class restore_scores():
 			for _query_id, _docs in restore_scores.results_dict.items():
 				_doc_type = "{}_doc".format(_query_id)
 				for _doc_id in _docs.keys():
-					_doc_len = doc_length(self._es_instance, self._source_index, _doc_type, _doc_id)
+					_doc_len = doc_length(self._es_instance, self._target_index, _doc_type, _doc_id)
 					restore_scores.results_dict[_query_id][_doc_id]["doc_len"] = _doc_len
 			print("Finished restoring doc length...")
 
@@ -93,9 +79,9 @@ class restore_scores():
 		_avg_doc_len = restore_scores.get_average_doc_len(self, _query_id)
 		_doc_type = "{}_doc".format(_query_id)
 		_type_size = len(restore_scores.results_dict[_query_id])
-		_D = total_num_docs(self._es_instance, self._source_index, _doc_type)
+		_D = total_num_docs(self._es_instance, self._target_index, _doc_type)
 		_ttf = sum(_doc["doc_len"] for _doc in restore_scores.results_dict[_query_id].values())
-		_V = text_unique_term_count(self._es_instance, self._source_index, _doc_type)
+		_V = text_unique_term_count(self._es_instance, self._target_index, _doc_type)
 		_query_len = len(_term_set)
 
 		return {"_avg_doc_len": _avg_doc_len,
@@ -182,10 +168,10 @@ class restore_scores():
 		# _doc_jm_dict = {doc_id: {term1: score, term2: score,...},
 		#                 doc_id: {term1: score, term2: score,...}, ...}
 		# init _log_x_dict depand on doc_len
-		for _doc in generate_all_doc(self._es_instance, self._source_index, _my_type=_doc_type):
+		for _doc in generate_all_doc(self._es_instance, self._target_index, _my_type=_doc_type):
 			# for laplace
 			_doc_len = restore_scores.results_dict[_query_id][_doc['_id']]["doc_len"]
-			_V = text_unique_term_count(self._es_instance, self._source_index, _doc_type)
+			_V = text_unique_term_count(self._es_instance, self._target_index, _doc_type)
 			_log_x_laplace_dict[_doc['_id']] /= (_doc_len + _V) ** len(_term_set)
 
 			# for jm
@@ -209,7 +195,7 @@ class restore_scores():
 				self._text_term_appeared_dict = {}
 
 				for _term in _term_set:
-					_doc_freq, _term_freq_dict = doc_freq_AND_term_freq(self._es_instance, self._source_index,
+					_doc_freq, _term_freq_dict = doc_freq_AND_term_freq(self._es_instance, self._target_index,
 					                                                    _query_param["_doc_type"],
 					                                                    _query_param["_type_size"], _term, "text")
 
@@ -233,7 +219,7 @@ class restore_scores():
 								self._text_term_appeared_dict[_doc_id] = 1
 
 
-				for _doc in generate_all_doc(self._es_instance, self._source_index, _my_type=_query_param["_doc_type"]):
+				for _doc in generate_all_doc(self._es_instance, self._target_index, _my_type=_query_param["_doc_type"]):
 					_change_script = ""
 
 					if self._update_doc_len:
@@ -265,17 +251,17 @@ class restore_scores():
 						_change_script += "ctx._source.features.jm = {};".format(_jm_score)
 
 					if self._text_unique_term_update:
-						_text_unique_term = text_unique_term_count(self._es_instance, self._source_index, _query_param["_doc_type"], _doc_id=_doc['_id'])
+						_text_unique_term = text_unique_term_count(self._es_instance, self._target_index, _query_param["_doc_type"], _doc_id=_doc['_id'])
 						_change_script += "ctx._source.features.text_unique_term = {};".format(_text_unique_term)
 
 					if self._title_unique_term_update:
-						_title_unique_term = title_unique_term_count(self._es_instance, self._source_index, _query_param["_doc_type"], _doc_id=_doc['_id'])
+						_title_unique_term = title_unique_term_count(self._es_instance, self._target_index, _query_param["_doc_type"], _doc_id=_doc['_id'])
 						_change_script += "ctx._source.features.title_unique_term = {};".format(_title_unique_term)
 
-					update_doc(self._es_instance, self._source_index, _query_param["_doc_type"], _doc['_id'],
+					update_doc(self._es_instance, self._target_index, _query_param["_doc_type"], _doc['_id'],
 					           _change_script=_change_script)
 
-				self._es_instance.indices.refresh(index=self._source_index)
+				self._es_instance.indices.refresh(index=self._target_index)
 
 
 	def title_term_appeared(self):
@@ -288,7 +274,7 @@ class restore_scores():
 				_query_param["_query_len"] = len(_term_set)
 
 				for _term in _term_set:
-					_doc_freq, _term_freq_dict = doc_freq_AND_term_freq(self._es_instance, self._source_index,
+					_doc_freq, _term_freq_dict = doc_freq_AND_term_freq(self._es_instance, self._target_index,
 					                                                    _query_param["_doc_type"],
 					                                                    _query_param["_type_size"], _term, "head")
 					if _term_freq_dict:
@@ -300,23 +286,23 @@ class restore_scores():
 
 				for _doc_id, _term_appeared_count in self._title_term_appeared_dict.items():
 					_change_script = "ctx._source.features.title_term_appeared_in_query_len = {};".format(_term_appeared_count/_query_param["_query_len"])
-					update_doc(self._es_instance, self._source_index, _query_param["_doc_type"], _doc_id,
+					update_doc(self._es_instance, self._target_index, _query_param["_doc_type"], _doc_id,
 					           _change_script=_change_script)
-				self._es_instance.indices.refresh(index=self._source_index)
+				self._es_instance.indices.refresh(index=self._target_index)
 
 
 if __name__ == '__main__':
 	start_time = time.time()
+
 	settings.init()
 
-	restore_behavior = restore_scores(settings.es, settings.source_index,
-	                                  _index_es_flag=True, _clear_features_flag=False,
+	restore_behavior = restore_scores(settings.es, settings.source_index, settings.source_type, settings.target_index,
+	                                  _index_es_flag=True,
 	                                  _okapi_idf_bm25=True, _laplace=True, _jm=True,
 	                                  _all_5_score=True, _update_doc_len=True,
 	                                  _text_term_appeared=True, _title_term_appeared=True,
 	                                  _text_unique_term_update=True, _title_unique_term_update=True)
 	restore_behavior.restore_text_title_lable()  # _write_es_flag
-	restore_behavior.clear_features()  # _clear_features_flag
 	restore_behavior.restore_doc_len()  # _restore_doc_len_flag
 
 	restore_behavior.restore_all_5_scores(settings.lam)

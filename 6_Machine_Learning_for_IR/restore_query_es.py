@@ -9,7 +9,7 @@ from collections import defaultdict
 from load_data_es import *
 
 
-def get_stop_set(stplst_path=r'AP_DATA\stoplist.txt'):
+def get_stop_set(stplst_path=r'stoplist.txt'):
 	'''
 	get a set, including all stop words
 	:param stplst_path:
@@ -21,7 +21,7 @@ def get_stop_set(stplst_path=r'AP_DATA\stoplist.txt'):
 
 
 # this is a generator
-def all_queries(_query_file=r'AP_DATA\modified_queries.txt'):
+def all_queries(_query_file=r'modified_queries.txt'):
 	'''
 	a gernerator to read queries by line from query txt
 	:param _query_file:
@@ -64,7 +64,7 @@ def get_query_list(_query, stopwords_set):
 	return {_query_id: _query}
 
 
-def load_qrels(_query_dict, _qrels_file='AP_DATA\qrels.adhoc.51-100.AP89.txt'):
+def load_qrels(_query_dict, _qrels_file='hw5_true_values_new.txt'):
 	'''
 	from qrels txt get docs relevant label, and restore by query id
 	_result_dict = {query_id: {'doc_id': {'label": 1}, 'doc_id': {'label": 0}, ...},
@@ -73,7 +73,6 @@ def load_qrels(_query_dict, _qrels_file='AP_DATA\qrels.adhoc.51-100.AP89.txt'):
 	:param _qrels_file:
 	:return:
 	'''
-	# _all_doc_id_set = set()
 	with open(_qrels_file, 'r', errors='replace') as _qrels:
 		_results_dict = defaultdict(dict)
 		for _ in _qrels:
@@ -82,15 +81,9 @@ def load_qrels(_query_dict, _qrels_file='AP_DATA\qrels.adhoc.51-100.AP89.txt'):
 			if _query in _query_dict.keys():
 				if _query not in _results_dict:
 					_results_dict[_query] = defaultdict(dict)
-				_results_dict[_query][_[2]]['label'] = int(_[3])
+				_results_dict[_query][_[2]]['label'] = float(_[3])
 
 	return _results_dict
-				# _all_doc_id_set.add(_[2])
-
-	# # write all doc id whose has a label in to a file
-	# with open('all_doc_id.txt', 'w', errors='replace') as f:
-	# 	for _doc_id in _all_doc_id_set:
-	# 		f.write('{}\n'.format(_doc_id))
 
 
 def get_query_dict():
@@ -101,6 +94,7 @@ def get_query_dict():
 		_query = get_query_list(_, _stop_set)
 		_query_dict.update(_query)
 	return _query_dict
+
 
 if __name__ == '__main__':
 	# es = Elasticsearch()

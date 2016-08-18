@@ -13,7 +13,7 @@ from urllib.parse import urlunparse, urlparse
 from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import TimeoutError
 from Node_Part_Graph import Node
-from elasticseach_func import *
+from elasticsearch_func import *
 
 # import lxml
 
