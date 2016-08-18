@@ -21,6 +21,6 @@ def init():
 		"okapi_tf", "tf_idf", "bm25", "laplace", "jm",
 	    "doc_len",
 	    "month", "day", "hour", "minuts",
-		"dateline",
-		"title_unique_term", "text_unique_term"
+	    "dateline",
+	    # "title_unique_term", "text_unique_term"
 	    ]
