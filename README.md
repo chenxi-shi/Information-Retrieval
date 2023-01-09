@@ -1,4 +1,7 @@
 # Information-Retrieval
+## Keywords
+Elasticsearch, MongoDB, Tornado Server, RESTful API, Python, Information Retrieval, Machine Learning, Web Crawler
+## Introduction
 Homework of my course "Information Retrieval", by Python 3.
 
  - Instructor: Virgil Pavlu
@@ -51,7 +54,11 @@ Homework of my course "Information Retrieval", by Python 3.
 
 
 Some of the print screen of home work
- - [search_result.png](/3_Web_Crawler/search_result.png "Optional Title")
- - [page_showing.png](/5_Web_Interface_Relevance_Assessments/page_showing.png "Optional Title")
- - [search_interface.png](/5_Web_Interface_Relevance_Assessments/search_interface.png "Optional Title")
- - [search_results.png](/5_Web_Interface_Relevance_Assessments/search_results.png "Optional Title")
+ - Search web page
+ ![page_showing.png](./5_Web_Interface_Relevance_Assessments/page_showing.png "Optional Title")
+ - Elasticsearch result
+ ![search_result.png](./3_Web_Crawler/search_result.png "Optional Title")
+ - Search Interface
+ ![search_interface.png](./5_Web_Interface_Relevance_Assessments/search_interface.png "Optional Title")
+ - Search Results
+ ![search_results.png](./5_Web_Interface_Relevance_Assessments/search_results.png "Optional Title")
