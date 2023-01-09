@@ -1,6 +1,16 @@
 # Information-Retrieval
 ## Keywords
 Elasticsearch, MongoDB, Tornado Server, RESTful API, Python, Information Retrieval, Machine Learning, Web Crawler
+## Screenshots
+ - Search web page
+ ![page_showing.png](./5_Web_Interface_Relevance_Assessments/page_showing.png "Optional Title")
+ - Elasticsearch result
+ ![search_result.png](./3_Web_Crawler/search_result.png "Optional Title")
+ - Search Interface
+ ![search_interface.png](./5_Web_Interface_Relevance_Assessments/search_interface.png "Optional Title")
+ - Search Results
+ ![search_results.png](./5_Web_Interface_Relevance_Assessments/search_results.png "Optional Title")
+ 
 ## Introduction
 Homework of my course "Information Retrieval", by Python 3.
 
@@ -52,13 +62,3 @@ Homework of my course "Information Retrieval", by Python 3.
  - tried different combination of feature to increase the performance of machine learning module
  - applied different machine learning modules including: Liner Regression, LogisticRegression, svm, svm rank
 
-
-Some of the print screen of home work
- - Search web page
- ![page_showing.png](./5_Web_Interface_Relevance_Assessments/page_showing.png "Optional Title")
- - Elasticsearch result
- ![search_result.png](./3_Web_Crawler/search_result.png "Optional Title")
- - Search Interface
- ![search_interface.png](./5_Web_Interface_Relevance_Assessments/search_interface.png "Optional Title")
- - Search Results
- ![search_results.png](./5_Web_Interface_Relevance_Assessments/search_results.png "Optional Title")
